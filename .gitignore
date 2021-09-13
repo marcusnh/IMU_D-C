@@ -2,7 +2,7 @@
 Data/
 best_model*
 events.out*
-noto-*
+noto-Mac*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

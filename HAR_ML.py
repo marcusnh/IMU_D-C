@@ -139,6 +139,8 @@ def normalize_data(data):
     return data
 
 data_train = normalize_data(data_train)
+data_test = normalize_data(data_test)
+
 
 # Preparing data for Keras
 ## Reshape data into segments of size TIME_PERIODS / sampling rate:
@@ -197,9 +199,10 @@ y_train_hot = np_utils.to_categorical(y_train, num_classes)
 N_NODES = 100
 # sequential keras model withh 100 nodes and 3 layers
 model_seq = Sequential()
+model_seq.add(Dense(N_NODES*2, activation='relu'))
 model_seq.add(Dense(N_NODES, activation='relu'))
-model_seq.add(Dense(N_NODES, activation='relu'))
-model_seq.add(Dense(N_NODES, activation='relu'))
+model_seq.add(Dense(N_NODES/2, activation='relu'))
+model_seq.add(Dense(N_NODES/4, activation='relu'))
 model_seq.add(Flatten())
 model_seq.add(Dense(num_classes, activation='softmax'))
 
@@ -221,7 +224,91 @@ callbacks_list = [
 # config the model  
 model_seq.compile(loss='categorical_crossentropy', optimizer ='adam', metrics = ['accuracy'])
 # fit the model:
-history = model_seq.fit(x_train, y_train_hot, batch_size=BATCH_SIZE, epochs=EPOCHS,
-                        callbacks=callbacks_list, validation_split= 0.2, verbose=1)
+# history = model_seq.fit(x_train, y_train_hot, batch_size=BATCH_SIZE, epochs=EPOCHS,
+#                         callbacks=callbacks_list, validation_split= 0.2, verbose=1)
+# print(model_seq.summary())
+
+## save model to keras:
+# model_seq.save('model.h5')
+# serialize model to JSON
+# # model_json = model_seq.to_json()
+# # with open('model.json', 'w') as json_file:
+# #     json_file.write(model_json)
+# serialize model to YAML
+# # model_yaml = model_seq.to_yaml()
+# # with open("model.yaml", "w") as yaml_file:
+# #     yaml_file.write(model_yaml)
+## serialize weights to HDF5
+# # model_seq.save_weights('model.h5')
+# print('Model saved')
+
+#To load the model:
+model_seq = keras.models.load_model('model.h5')
+# load JSON and create model
+# # json_file = open('model.json', 'r')
+# # loaded_model_json = json_file.read()
+# # json_file.close()
+# # model_seq = keras.models.model_from_json(loaded_model_json)
+
+# load YAML and create model
+# # yaml_file = open('model.yaml', 'r')
+# # loaded_model_yaml = yaml_file.read()
+# # yaml_file.close()
+# # model_seq = keras.model_from_yaml(loaded_model_yaml)
+## load weights:
+# model_seq.load_weights('model.h5')
+print('Loaded weights from disk')
 print(model_seq.summary())
+
+
+#################################################################
+# 5) Evaluate and illustrations
+# accuracy and loss, confusion matrix etc
+#################################################################
+
+# plt.figure(figsize=(6, 4))
+# plt.plot(history.history['accuracy'], 'r', label='Accuracy of training data')
+# plt.plot(history.history['val_accuracy'], 'b', label='Accuracy of validation data')
+# plt.plot(history.history['loss'], 'r--', label='Loss of training data')
+# plt.plot(history.history['val_loss'], 'b--', label='Loss of validation data')
+# plt.title('Model Accuracy and  Loss')
+# plt.ylabel('Accuracy and Loss')
+# plt.xlabel('Training Epoch')
+# plt.ylim(0)
+# plt.legend()
+# plt.show()
+
+# Print confusion matrix:
+y_pred_train = model_seq.predict(x_train)
+best_class_train = np.argmax(y_pred_train, axis=1)
+
+print(classification_report(y_train, best_class_train))
+
+# check against test data
+def create_confusion_matrix(vali, predict):
+    matrix = metrics.confusion_matrix(vali, predict) 
+    plt.figure( figsize=(6, 4))
+    sns.heatmap(matrix, cmap='coolwarm', linecolor='white',linewidths=1, 
+                xticklabels=LABELS, yticklabels=LABELS, annot=True, fmt='d')
+    plt.title('Confusion Matrix')
+    plt.ylabel('True Label')
+    plt.xlabel('Predicted Label')
+    plt.show()
+
+x_test, y_test = prepare_data_keras(data_test, TIME_PERIODS, STEP_DISTANCE, LABEL)
+x_test = x_test.astype('float32')
+y_test = y_test.astype('float32')
+y_test = np_utils.to_categorical(y_test, num_classes)
+score = model_seq.evaluate(x_test, y_test, verbose=1)
+print('\nAccuracy on test data: %0.2f' % score[1])
+print('\nLoss on test data: %0.2f' % score[0])
+
+y_pred_test = model_seq.predict(x_test)
+best_class_pred_test = np.argmax(y_pred_test, axis=1)
+best_class_test = np.argmax(y_test, axis=1)
+
+
+create_confusion_matrix(best_class_test, best_class_pred_test)
+print(classification_report(best_class_test, best_class_pred_test))
+print(list(le.classes_))
 
