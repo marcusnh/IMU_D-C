@@ -23,7 +23,7 @@ plt.style.use('fivethirtyeight')
 #         p[i].set_color(color[i]) #set the colour of each curve
 
 def animate(i):
-    data = pd.read_csv('Data/run_file.csv', delimiter=',', header=0, sep = r',', skipinitialspace = True)
+    data = pd.read_csv('Data/testfile.csv', delimiter=',', header=0, skipinitialspace = True)
     print(data)
     x = data['Time']
     y1 = data['Accel-X (g)']
@@ -40,7 +40,7 @@ def animate(i):
     
         
 # animator = ani.FuncAnimation(fig, buildmebarchart, interval = 0.000000001)
-animator = ani.FuncAnimation(plt.gcf(), animate, interval=1000)
+animator = ani.FuncAnimation(plt.gcf(), animate, frames=100, interval=1000, blit=True, repeat=False)
 plt.tight_layout()
 
 plt.show()

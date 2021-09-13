@@ -1,5 +1,8 @@
 #My files
 Data/
+best_model*
+events.out*
+noto-*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

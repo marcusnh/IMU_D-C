@@ -1,3 +1,4 @@
 # IMU_D-C
-fgd
-fksdjbgsjbgsabjgsløbg
+
+## Install necessary modules with:
+pip install -r requirements.txt

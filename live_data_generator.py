@@ -20,7 +20,7 @@ data = pd.read_csv('Data/30824_OARMH20010.csv')
 # data = pd.read_csv('Data/testfile.csv')
 
 def animate(i):
-    indx = next(index)+ 1065000
+    indx = next(index) #+ 1065000
     indx_values.append(indx)
     counter = next(index)
     print(counter,indx)
@@ -48,7 +48,7 @@ def animate(i):
     
     plt.title('Data from IMU')
 
-ani = FuncAnimation(plt.gcf(), animate, interval= 0.1, frames= 100)
+ani = FuncAnimation(plt.gcf(), animate, interval= 1, frames= 10)
 # Lower interval faster speed of animation, in miliseconds
 plt.tight_layout()
 plt.show()
