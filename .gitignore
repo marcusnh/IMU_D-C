@@ -1,8 +1,8 @@
 #My files
-Data/
+Data/*.csv
 best_model*
 events.out*
-noto-Mac*
+noto*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
