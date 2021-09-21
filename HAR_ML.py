@@ -39,7 +39,7 @@ pd.options.display.float_format = '{:.1f}'.format
 sns.set() # Default seaborn look and feel
 plt.style.use('ggplot')
 # # color template:
-colors =['brown', 'red', 'green', 'blue', 'yellow', 'orange', ]
+# colors =['brown', 'red', 'green', 'blue', 'yellow', 'orange', ]
 N_FEATURES = 3
 ## labels we will be using for classificaion:
 LABELS ={'Downstairs', 'Jogging', 'Sitting', 'Standing', 'Upstairs', 'Walking'} 
