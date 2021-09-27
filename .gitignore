@@ -1,5 +1,5 @@
 #My files
-Data/*.csv
+Data/*
 best_model*
 events.out*
 noto*
