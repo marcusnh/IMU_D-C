@@ -7,8 +7,9 @@
 #SBATCH --mem=12000
 #SBATCH --job-name="hello_test"
 #SBATCH --output=test-srun.out
-#SBATCH --mail-user=marcusnh@stud.ntnu.com
+#SBATCH --mail-user=marcusnh@stud.ntnu.no
 #SBATCH --mail-type=ALL
+#SBATCH --gres=gpu:2
 
 WORKDIR=${SLURM_SUBMIT_DIR}
 cd ${WORKDIR}

@@ -1,51 +1,51 @@
 @relation activity_recognition_labeled
 
-@attribute "UNIQUE_ID" numeric
-@attribute "user" {"33" , "17", "29", "13" , "20" , "27" , "6" , "15" , "32" , "36" , "18" , "35" , "11" , "16" , "5", "10" , "28" , "26" , "14" , "24" , "12" , "23" , "4" , "30" , "34" , "8" , "31" , "21" , "3" , "22" , "1" , "25" , "9" , "2" , "7" , "19"} 
-@attribute "X0" numeric
-@attribute "X1" numeric
-@attribute "X2" numeric
-@attribute "X3" numeric
-@attribute "X4" numeric
-@attribute "X5" numeric
-@attribute "X6" numeric
-@attribute "X7" numeric
-@attribute "X8" numeric
-@attribute "X9" numeric
-@attribute "Y0" numeric
-@attribute "Y1" numeric
-@attribute "Y2" numeric
-@attribute "Y3" numeric
-@attribute "Y4" numeric
-@attribute "Y5" numeric
-@attribute "Y6" numeric
-@attribute "Y7" numeric
-@attribute "Y8" numeric
-@attribute "Y9" numeric
-@attribute "Z0" numeric
-@attribute "Z1" numeric
-@attribute "Z2" numeric
-@attribute "Z3" numeric
-@attribute "Z4" numeric
-@attribute "Z5" numeric
-@attribute "Z6" numeric
-@attribute "Z7" numeric
-@attribute "Z8" numeric
-@attribute "Z9" numeric
-@attribute "XAVG" numeric
-@attribute "YAVG" numeric
-@attribute "ZAVG" numeric
-@attribute "XPEAK" numeric
-@attribute "YPEAK" numeric
-@attribute "ZPEAK" numeric
-@attribute "XABSOLDEV" numeric
-@attribute "YABSOLDEV" numeric
-@attribute "ZABSOLDEV" numeric
-@attribute "XSTANDDEV" numeric
-@attribute "YSTANDDEV" numeric
-@attribute "ZSTANDDEV" numeric
-@attribute "RESULTANT" numeric
-@attribute class{ "Walking" , "Jogging" , "Upstairs" , "Downstairs" , "Sitting" , "Standing" }
+@attribute UNIQUE_ID numeric
+@attribute user {33, 17, 29, 13, 20, 27, 6, 15, 32, 36, 18, 35, 11, 16, 5, 10, 28, 26, 14, 24, 12, 23, 4, 30, 34, 8, 31, 21, 3, 22, 1, 25, 9, 2, 7, 19} 
+@attribute X0 numeric
+@attribute X1 numeric
+@attribute X2 numeric
+@attribute X3 numeric
+@attribute X4 numeric
+@attribute X5 numeric
+@attribute X6 numeric
+@attribute X7 numeric
+@attribute X8 numeric
+@attribute X9 numeric
+@attribute Y0 numeric
+@attribute Y1 numeric
+@attribute Y2 numeric
+@attribute Y3 numeric
+@attribute Y4 numeric
+@attribute Y5 numeric
+@attribute Y6 numeric
+@attribute Y7 numeric
+@attribute Y8 numeric
+@attribute Y9 numeric
+@attribute Z0 numeric
+@attribute Z1 numeric
+@attribute Z2 numeric
+@attribute Z3 numeric
+@attribute Z4 numeric
+@attribute Z5 numeric
+@attribute Z6 numeric
+@attribute Z7 numeric
+@attribute Z8 numeric
+@attribute Z9 numeric
+@attribute XAVG numeric
+@attribute YAVG numeric
+@attribute ZAVG numeric
+@attribute XPEAK numeric
+@attribute YPEAK numeric
+@attribute ZPEAK numeric
+@attribute XABSOLDEV numeric
+@attribute YABSOLDEV numeric
+@attribute ZABSOLDEV numeric
+@attribute XSTANDDEV numeric
+@attribute YSTANDDEV numeric
+@attribute ZSTANDDEV numeric
+@attribute RESULTANT numeric
+@attribute class {Walking, Jogging, Upstairs, Downstairs, Sitting, Standing}
 
 @data
 1,33,0.04,0.09,0.14,0.12,0.11,0.1,0.08,0.13,0.13,0.08,0.09,0.1,0.11,0.11,0.08,0.04,0.16,0.13,0.1,0.03,0.12,0.08,0.09,0.12,0.1,0.1,0.08,0.11,0.12,0.1,0,8.4,1.76,2075,293.94,1550,3.29,7.21,4,4.05,8.17,4.05,11.96,Jogging

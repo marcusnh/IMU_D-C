@@ -1,37 +1,36 @@
-import skinematics as skin
+from tsfresh.examples.robot_execution_failures import download_robot_execution_failures, \
+    load_robot_execution_failures
+download_robot_execution_failures()
 
-from skinematics.sensors.xsens import XSens
-from skinematics.sensors.manual import MyOwnSensor
-import numpy as np
+from tsfresh import extract_features
+from tsfresh import select_features
+from tsfresh.utilities.dataframe_functions import impute
+from tsfresh import extract_relevant_features
+from get_data import txt_to_pd_WISDM
+import tsfresh
+# timeseries, y = load_robot_execution_failures()
 
-skin.imus.IMU_Base.get_data('Data/testfile.csv')
+# print(timeseries, y)
 
-# Set the in-file, initial sensor orientation
-in_file = r'Data/test_skins.txt'
-initial_orientation = np.array([[1,0,0],
-                                [0,0,-1],
-                                [0,1,0]])
+# extracted_features = extract_features(timeseries, column_id="id", column_sort="time")
+# print(extracted_features)
+# impute(extracted_features)
+# features_filtered = select_features(extracted_features, y)
 
-# Only read in the data
-data = XSens(in_file, q_type=None)
+# print(features_filtered)
 
-# Read in and evaluate the data
-sensor = XSens(in_file=in_file, R_init=initial_orientation)
+# features_filtered_direct = extract_relevant_features(timeseries, y,
+#                                                      column_id='id', column_sort='time')
 
-# By default, the orientation quaternion gets automatically calculated,
-#    using the option "analytical"
-q_analytical = sensor.quat
+# print(features_filtered_direct)
+data = txt_to_pd_WISDM()
+data = data[0:1000]
+print(type(data['x-axis'][0]))
 
-# Automatic re-calculation of orientation if "q_type" is changed
-sensor.set_qtype('madgwick')
-q_Madgwick = sensor.quat
+print(data)
+y = data['activity']
+data = data.drop(['activity'], axis=1)
+ts = tsfresh.extract_features(data, column_id='user_id', 
+    column_sort ='timestamp', column_kind=None, column_value=None)
 
-sensor.set_qtype('kalman')
-q_Kalman = sensor.quat
-
-# Demonstrate how to fill up a sensor manually
-in_data = {'rate':sensor.rate,
-        'acc': sensor.acc,
-        'omega':sensor.omega,
-        'mag':sensor.mag}
-my_sensor = MyOwnSensor(in_file='My own 123 sensor.', in_data=in_data)
+print(ts)
