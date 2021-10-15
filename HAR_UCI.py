@@ -6,90 +6,179 @@ import matplotlib as mlt
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.manifold import TSNE
+from sklearn.metrics import classification_report
 
 import plotly
 import plotly.graph_objects as go
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-# get the features from the file features.txt
+# Import Keras
+from keras import backend as K
+from keras.models import Sequential
+from keras.layers import LSTM
+from keras.layers.core import Dense, Dropout
+from keras.layers import BatchNormalization
+from keras.regularizers import L1L2
 
-print(train.shape, test.shape)
+# Importing tensorflow
+np.random.seed(42)
+import tensorflow as tf
+tf.random.set_seed(42)
+from visualize_data import confusion_matrix, total_activities
 
-columns = train.columns
+# Data directory
+DATADIR = 'Data/UCI/UCI_HAR_Dataset'
 
-# Removing '()' from column names
-columns = columns.str.replace('[()]','')
-columns = columns.str.replace('[-]', '')
-columns = columns.str.replace('[,]','')
+# Raw data signals
+# Signals are from Accelerometer and Gyroscope
+# The signals are in x,y,z directions
+# Sensor signals are filtered to have only body acceleration
+# excluding the acceleration due to gravity
+# Triaxial acceleration from the accelerometer is total acceleration
+SIGNALS = [
+    "body_acc_x",
+    "body_acc_y",
+    "body_acc_z",
+    # "body_gyro_x",
+    # "body_gyro_y",
+    # "body_gyro_z",
+    "total_acc_x",
+    "total_acc_y",
+    "total_acc_z"
+    ]
+LABELS = {
+    0: 'WALKING',
+    1: 'WALKING_UPSTAIRS',
+    2: 'WALKING_DOWNSTAIRS',
+    3: 'SITTING',
+    4: 'STANDING',
+    5: 'LAYING',
+}
+# function to read the data from csv file
+def _read_csv(filename):
+    return pd.read_csv(filename, delim_whitespace=True, header=None)
 
-train.columns = columns
-test.columns = columns
+# function to load the load
+def load_signals(subset):
+    signals_data = []
 
-# sns.set_style('whitegrid')
-# plt.rcParams['font.family'] = 'Dejavu Sans'
+    for signal in SIGNALS:
+        filename = f'Data/UCI/UCI_HAR_Dataset/{subset}/Inertial_Signals/{signal}_{subset}.txt'
+        signals_data.append(
+            _read_csv(filename).to_numpy()
+        ) 
 
-# plt.figure(figsize=(16,8))
-# plt.title('Data provided by each user', fontsize=20)
-# sns.countplot(x='subject',hue='ActivityName', data = train)
-# plt.show()
+    # Transpose is used to change the dimensionality of the output,
+    # aggregating the signals by combination of sample/timestep.
+    # Resultant shape is (7352 train/2947 test samples, 128 timesteps, 9 signals)
+    return np.transpose(signals_data, (1, 2, 0))
 
-# print(train)
+def load_y(subset):
+    """
+    The objective that we are trying to predict is a integer, from 1 to 6,
+    that represents a human activity. We return a binary representation of 
+    every sample objective as a 6 bits vector using One Hot Encoding
+    (https://pandas.pydata.org/pandas-docs/stable/generated/pandas.get_dummies.html)
+    """
+    filename = f'Data/UCI/UCI_HAR_Dataset/{subset}/y_{subset}.txt'
+    y = _read_csv(filename)[0]
 
-# Plotting data
-# label_counts = train['ActivityName'].value_counts()
-
-# # Get colors
-# n = label_counts.shape[0]
-# colormap = plt.get_cmap('viridis')
-# colors = [mlt.colors.to_hex(colormap(col)) for col in np.arange(0, 1.01, 1/(n-1))]
-
-# # Create plot
-# data = go.Bar(x = label_counts.index,
-#               y = label_counts,
-#               marker = dict(color = colors))
-
-# layout = go.Layout(title = 'Smartphonefrom sklearn.manifold import TSNE
-# fig = go.Figure(data=[data], layout=layout)
-# fig.show()
-# #iplot(fig)
-
-sns.set_palette("Set1", desat=0.80)
-facetgrid = sns.FacetGrid(train, hue='ActivityName', height=5,aspect=2)
-facetgrid.map(sns.kdeplot,'tBodyAccMagmean').add_legend()
-plt.annotate("Stationary Activities", xy=(-0.960,12), xytext=(-0.5, 15), size=20,\
-            va='center', ha='left',\
-            arrowprops=dict(arrowstyle="simple",connectionstyle="arc3,rad=0.1"))
-
-plt.annotate("Moving Activities", xy=(0,3), xytext=(0.2, 9), size=20,\
-            va='center', ha='left',\
-            arrowprops=dict(arrowstyle="simple",connectionstyle="arc3,rad=0.1"))
-plt.show()
-
-def perform_tsne(X_data, y_data, perplexities, n_iter=1000, img_name_prefix='t-sne'):
-        
-    for index,perplexity in enumerate(perplexities):
-        # perform t-sne
-        print('\nperforming tsne with perplexity {} and with {} iterations at max'.format(perplexity, n_iter))
-        X_reduced = TSNE(verbose=2, perplexity=perplexity).fit_transform(X_data)
-        print('Done..')
-        
-        # prepare the data for seaborn         
-        print('Creating plot for this t-sne visualization..')
-        df = pd.DataFrame({'x':X_reduced[:,0], 'y':X_reduced[:,1] ,'label':y_data})
-        print(df)
-        
-        # draw the plot in appropriate place in the grid
-        sns.lmplot(data=df, x='x', y='y', hue='label', fit_reg=False, height=8,\
-                   palette="Set1",markers=['^','v','s','o', '1','2'])
-        plt.title("perplexity : {} and max_iter : {}".format(perplexity, n_iter))
-        img_name = img_name_prefix + '_perp_{}_iter_{}.png'.format(perplexity, n_iter)
-        print('saving this plot as image in present working directory...')
-        plt.savefig(img_name)
-        plt.show()
-        print('Done')
+    return pd.get_dummies(y).to_numpy(),y
 
 
-print(train)
-X_pre_tsne = train.drop(['subject', 'Activity','ActivityName'], axis=1)
-y_pre_tsne = train['ActivityName']
-print(y_pre_tsne)
-perform_tsne(X_data = X_pre_tsne,y_data=y_pre_tsne, perplexities =[2,5,10,20,50])
+def load_data():
+    """
+    Obtain the dataset from multiple files.
+    Returns: X_train, X_test, y_train, y_test
+    """
+    X_train, X_test = load_signals('train'), load_signals('test')
+    y_train_hot, y_train, = load_y('train')
+    y_test_hot, y_test = load_y('test')
+    return X_train, X_test, y_train_hot, y_train, y_test_hot, y_test
+
+# summarize the balance of classes in an output variable column
+def class_breakdown(data):
+	# convert the numpy array into a dataframe
+	df = pd.DataFrame(data)
+	# group data by the class value and calculate the number of rows
+	counts = df.groupby(0).size()
+	# retrieve raw rows
+	counts = counts.values
+	# summarize
+	for i in range(len(counts)):
+		percent = counts[i] / len(df) * 100
+		print('Class=%d, total=%d, percentage=%.3f' % (i+1, counts[i], percent))
+
+# summarize the balance of classes in an output variable column
+def class_breakdown(data):
+	# convert the numpy array into a dataframe
+	df = pd.DataFrame(data)
+	# group data by the class value and calculate the number of rows
+	counts = df.groupby(0).size()
+	# retrieve raw rows
+	counts = counts.values
+	# summarize
+	for i in range(len(counts)):
+		percent = counts[i] / len(df) * 100
+		print('Class=%d, total=%d, percentage=%.3f' % (i+1, counts[i], percent))
+
+# Initializing parameters
+epochs = 30
+batch_size = 16
+n_hidden = 32
+
+
+#function to count the number of classes
+def _count_classes(y):
+    return len(set([tuple(category) for category in y]))
+
+
+# Loading the train and test data
+X_train, X_test, Y_train, y_train, Y_test, y_test = load_data()
+
+timesteps = len(X_train[0])
+input_dim = len(X_train[0][0])
+n_classes = _count_classes(Y_train)
+# print(y_train)
+# class_breakdown(y_train)
+
+print(timesteps)
+print(input_dim)
+print(len(X_train))
+
+
+
+# Initiliazing the sequential model
+model = Sequential()
+# Configuring the parameters
+model.add(LSTM(n_hidden, input_shape=(timesteps, input_dim)))
+# Adding a dropout layer
+model.add(Dropout(0.5))
+# Adding a dense output layer with sigmoid activation
+model.add(Dense(n_classes, activation='sigmoid'))
+model.summary()
+
+# Compiling the model
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+
+
+# Training the model
+model.fit(X_train, Y_train, batch_size=batch_size, validation_data=(X_test, Y_test),epochs=epochs)
+
+# Print confusion matrix:
+y_pred_train = model.predict(X_train)
+best_class_train = np.argmax(y_pred_train, axis=1)
+print('Classification report for training data:')
+print(classification_report(y_train, best_class_train))
+score = model.evaluate(X_test, Y_test)
+
+print("\n   cat_crossentropy  ||   accuracy ")
+print("  ____________________________________")
+print(score)
+
+y_pred_test = model.predict(X_test)
+best_class_pred_test = np.argmax(y_pred_test, axis=1)
+best_class_test = np.argmax(Y_test, axis=1)
+confusion_matrix(best_class_test, best_class_pred_test, LABELS.values(), normalize=True)
+print('Classification report for test data')
+print(classification_report(best_class_test, best_class_pred_test))
+print(LABELS)

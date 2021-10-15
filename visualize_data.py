@@ -8,7 +8,14 @@ from sklearn.manifold import TSNE
 from sklearn import metrics
 
 from get_data import txt_to_pd_WISDM
-from pre_processing import normalize_data
+
+
+
+def total_activities(data):
+    sns.set_style('whitegrid')
+    # data['activity'].value_counts().plot(kind='bar', title='Number of acitivity samples')
+    sns.countplot(x='activity', data=data)
+    plt.show()
 
 
 def activity_data_per_user(data):
@@ -42,6 +49,58 @@ def activity_boxplot_dist(data, column):
     plt.xticks(rotation=40)
     plt.show()
 
+def show_activity(data, activity, user_id, samples=128):
+    # Show single activity for a spesific user
+    user_data = data[data['user_id']==user_id]
+    user_data = user_data.drop(columns=['timestamp', 'user_id'])
+    activities = user_data['activity'].unique()
+    print('\nNumber of samples per activity:')
+    print(user_data['activity'].value_counts())
+    user_data = user_data[user_data['activity']==activity]
+    title = activity+' for user: ' +str(user_id)
+    user_data[0:samples].plot(title=title)
+    plt.show()
+
+
+
+def compare_user_activitys(data, user_id, samples=128):
+    #Look at all activities of user with pre defined number of samples
+    user_data = data[data['user_id']==user_id]
+    user_data = user_data.drop(columns=['timestamp', 'user_id'])
+    
+    activities = user_data['activity'].unique()
+    print('\nNumber of samples per activity:')
+    print(user_data['activity'].value_counts())
+
+    fig, axes = plt.subplots(nrows=1, ncols=len(activities), figsize=(10, 5))
+    counter = 0
+    # user_data[user_data['activity'] == 'Jogging'].to_csv(path_or_buf='testfile.csv')
+    for i in activities:
+        activity_data = user_data[user_data['activity'] == i]
+        activity_data.index = range(0,len(activity_data))
+        activity_data[0:samples].plot(title=i, ax=axes[counter])
+        counter +=1
+    
+    plt.show()
+
+def activity_difference_between_users(data, users, activity):
+    cnt = 0
+    fig, axes = plt.subplots(nrows=1, ncols=len(users), figsize=(20, 10))
+    plt.suptitle('Comparing activity:'+activity)
+    for i in users:
+        user_data =data[(data['user_id'] ==i) & (data['activity'] == activity)]
+        user_data.index = range(0,len(user_data))
+        # if user_data.empty:
+        #     print(user_data)
+
+        user_data = user_data.drop(columns=['timestamp', 'user_id'])
+        user_data.plot(title='User id: ' +str(i), ax=axes[cnt])
+        cnt += 1
+
+    plt.show()
+
+
+
 def confusion_matrix(vali, predict, LABELS, normalize=False):
     matrix = metrics.confusion_matrix(vali, predict) 
     print('\n ********Confusion Matrix********')
@@ -54,6 +113,19 @@ def confusion_matrix(vali, predict, LABELS, normalize=False):
     plt.title('Confusion Matrix')
     plt.ylabel('True Label')
     plt.xlabel('Predicted Label')
+    plt.show()
+
+def show_performance_DNN(history):
+    plt.figure(figsize=(6, 4))
+    plt.plot(history.history['accuracy'], 'r', label='Accuracy of training data')
+    plt.plot(history.history['val_accuracy'], 'b', label='Accuracy of validation data')
+    plt.plot(history.history['loss'], 'r--', label='Loss of training data')
+    plt.plot(history.history['val_loss'], 'b--', label='Loss of validation data')
+    plt.title('Model Accuracy and  Loss')
+    plt.ylabel('Accuracy and Loss')
+    plt.xlabel('Training Epoch')
+    plt.ylim(0)
+    plt.legend()
     plt.show()
 
 def execute_TSNE(data, perplexities=[2,5,10,20,50], n_iter=1000, 
@@ -84,8 +156,15 @@ if __name__ == '__main__':
     file_path = 'Data/WISDM_ar_v1.1/WISDM_ar_v1.1_raw.txt'
     data = txt_to_pd_WISDM(file_path)
 
-    data['mean'] = data[['x-axis', 'y-axis', 'z-axis']].mean(numeric_only=True, axis=1)
+    # data['mean'] = data[['x-axis', 'y-axis', 'z-axis']].mean(numeric_only=True, axis=1)
     print(data)
+    # total_activities(data)
+    # activity_data_per_user(data)
+    users = [1, 2, 33, 29]
+    activity = 'Downstairs'
+    # compare_user_activitys(data , users[0])
+    activity_difference_between_users(data, users, activity)
+
     # data = normalize_data(data)
     # # data = tilt_angle(data)
     # # data = SVM(data)

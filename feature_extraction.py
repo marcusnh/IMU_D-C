@@ -17,6 +17,8 @@ def tilt_angle(data):
     data = pd.merge(data, df, left_index=True, right_index=True)
     return data
 
+
+
 def feature_extraction(data, sec=10, overlap_prosent=50):
     x_values = []
     y_values = []
@@ -27,7 +29,7 @@ def feature_extraction(data, sec=10, overlap_prosent=50):
     id_values = []
 
 
-      # Extracty the wanted features from segment
+    # Extracty the wanted features from segment
     time_steps = sec*20
     overlap =int(time_steps*(1-overlap_prosent/100))
     if overlap_prosent>100 or overlap_prosent<0:

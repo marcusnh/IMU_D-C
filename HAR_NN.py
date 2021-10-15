@@ -115,8 +115,6 @@ def show_info(data):
     plt.show()
 
 
-
-
 def show_activity(activity, data):
     fig, (ax0, ax1, ax2) = plt.subplots(nrows=3, figsize=(16,12),
             sharex=True)
@@ -251,7 +249,7 @@ def train_model(BATCH_SIZE, EPOCHS, file_name, file_type, model, x_train, y_trai
         keras.callbacks.EarlyStopping(monitor='val_accuracy',mode='max',verbose=1, patience=7, 
                                       min_delta=0.001),]
 
-     # config the model  
+     # config the model , can also yuse optimizer rmsprop' 
     model.compile(loss='categorical_crossentropy', optimizer ='adam', metrics = ['accuracy'])
     # fit the model:
     history = model.fit(x_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS,
@@ -445,7 +443,6 @@ if __name__ == '__main__':
 #     model_seq = train_model(BATprint(mean)
 # #############################################################################
 # #                   5) Evaluat#ion and40 illustrations
-
 # # accuracy and loss, confusion matrix etc
 # #############################################################################
 
