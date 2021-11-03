@@ -8,6 +8,7 @@ from sklearn.manifold import TSNE
 from sklearn import metrics
 
 from get_data import txt_to_pd_WISDM
+from pre_processing import normalize_data
 
 
 
@@ -17,6 +18,22 @@ def total_activities(data):
     sns.countplot(x='activity', data=data)
     plt.show()
 
+def sample_extraction(data):
+    data = data[0:128]
+    fig, axes = plt.subplots(nrows=3, ncols=1,  figsize=(6, 6))
+    data = data.drop(columns=['timestamp', 'user_id', 'activity'])
+    data['x-axis'].plot(ax = axes[0], c='r')
+
+    axes[0].set_ylabel('Acc x-axis', fontsize=20)
+    axes[0].legend(loc='upper right')
+    data['y-axis'].plot(ax = axes[1], c='g')
+
+    axes[1].set_ylabel('Acc y-axis', fontsize=20)
+    axes[1].legend(loc='upper right')
+    data['z-axis'].plot(ax = axes[2], c='b')
+
+    axes[2].legend(loc='upper right')
+    axes[2].set_ylabel('Acc z-axis', fontsize=20)
 
 def activity_data_per_user(data):
     sns.set_style('whitegrid')
@@ -31,7 +48,7 @@ def activity_wise_dist(data, column):
     sns.set_palette("Set1", desat=0.80)
     facetgrid = sns.FacetGrid(data, hue='activity')
     facetgrid.map(sns.kdeplot, column ).add_legend()
-    plt.show()
+   
 
 
 def activity_boxplot_dist(data, column):
@@ -49,28 +66,49 @@ def activity_boxplot_dist(data, column):
     plt.xticks(rotation=40)
     plt.show()
 
-def show_activity(data, activity, user_id, samples=128):
+def show_activity(data, activity, user_id, start = 0, samples=None):
+
     # Show single activity for a spesific user
     user_data = data[data['user_id']==user_id]
     user_data = user_data.drop(columns=['timestamp', 'user_id'])
-    activities = user_data['activity'].unique()
+    print('\nNumber of samples per activity:')
+    print(user_data['activity'].value_counts())
+    user_data = user_data[user_data['activity']==activity]
+    if samples == None:
+        samples = len(user_data)
+
+    index = range(start, samples)
+    new_data = user_data[start:samples]
+    new_data.index = index
+    print(new_data)
+    title = activity+' for user: ' +str(user_id)
+    new_data.plot(title=title, )
+    plt.legend(loc='upper right')
+
+def plot_activity(data, activity, user_id):
+
+    # Show single activity for a spesific user
+    user_data = data[data['user_id']==user_id]
+    user_data = user_data.drop(columns=['timestamp', 'user_id'])
     print('\nNumber of samples per activity:')
     print(user_data['activity'].value_counts())
     user_data = user_data[user_data['activity']==activity]
     title = activity+' for user: ' +str(user_id)
-    user_data[0:samples].plot(title=title)
-    plt.show()
+    user_data.plot(title=title, )
+    plt.legend(loc='upper right')
 
 
-
-def compare_user_activitys(data, user_id, samples=128):
-    #Look at all activities of user with pre defined number of samples
+def compare_user_activitys(data, user_id, samples=128, activity=None):
+    #Look at all activities  or one activity of user with pre defined number of samples
     user_data = data[data['user_id']==user_id]
     user_data = user_data.drop(columns=['timestamp', 'user_id'])
-    
-    activities = user_data['activity'].unique()
-    print('\nNumber of samples per activity:')
-    print(user_data['activity'].value_counts())
+    activities = []
+    if activity == None:
+        activities = user_data['activity'].unique()
+        print('\nNumber of samples per activity:')
+        print(user_data['activity'].value_counts())
+    else:
+        activities.append(activity)
 
     fig, axes = plt.subplots(nrows=1, ncols=len(activities), figsize=(10, 5))
     counter = 0
@@ -78,17 +116,21 @@ def compare_user_activitys(data, user_id, samples=128):
     for i in activities:
         activity_data = user_data[user_data['activity'] == i]
         activity_data.index = range(0,len(activity_data))
-        activity_data[0:samples].plot(title=i, ax=axes[counter])
+        if activity == None:
+            activity_data[0:samples].plot(title=i, ax=axes[counter])
+        else:
+            activity_data[0:samples].plot(title=i, ax=axes)
         counter +=1
-    
     plt.show()
+    
 
-def activity_difference_between_users(data, users, activity):
+def activity_difference_between_users(data, users, activity, samples=128):
     cnt = 0
     fig, axes = plt.subplots(nrows=1, ncols=len(users), figsize=(20, 10))
     plt.suptitle('Comparing activity:'+activity)
     for i in users:
         user_data =data[(data['user_id'] ==i) & (data['activity'] == activity)]
+        user_data =user_data[0:samples]
         user_data.index = range(0,len(user_data))
         # if user_data.empty:
         #     print(user_data)
@@ -97,7 +139,7 @@ def activity_difference_between_users(data, users, activity):
         user_data.plot(title='User id: ' +str(i), ax=axes[cnt])
         cnt += 1
 
-    plt.show()
+    # plt.show()
 
 
 
@@ -152,18 +194,68 @@ def execute_TSNE(data, perplexities=[2,5,10,20,50], n_iter=1000,
     return 0
 
 
+def activity_length(df):
+    activity = df.iloc[0]['activity']
+    length_activities = []
+    activities = []
+    counter = 0
+    for index, row in df.iterrows():
+        if row['activity'] == activity:
+            counter += 1
+        else:
+            # print(activity, counter)
+            
+            activities.append(activity)
+            length_activities.append(counter)
+
+            counter = 0
+            activity = row['activity']
+    print(activities)
+    print(length_activities)
+    # plt.bar(activities, length_activities)
+    sns.set_palette("Set1", desat=0.80)
+    df = pd.DataFrame(list(zip(activities, length_activities)), columns=['activity', 'length'])
+    print(df)
+    print('Average values:')
+    print(df.groupby('activity')['length'].mean())
+    print('max values:')
+    print(df.groupby('activity').max())
+    print('Min values:')
+    print(df.groupby('activity').min())
+    print('Number of segments:')
+    print(df.groupby('activity').count())
+    #Show boxplot:
+    plt.figure(figsize=(7,5))
+    sns.boxplot(x=activities, y=length_activities, showfliers=False, saturation=1)
+    plt.xticks(rotation=40)
+    plt.ylabel('Size of activity sequence')
+    plt.title('Activity sequences information')
+    plt.show()
+
 if __name__ == '__main__':
     file_path = 'Data/WISDM_ar_v1.1/WISDM_ar_v1.1_raw.txt'
     data = txt_to_pd_WISDM(file_path)
-
+    # file_path = 'Data/test/WISDM_feature_new.csv'
+    # feature_df = pd.read_csv(file_path, index_col=0 )
+    # data = normalize_data(data)
     # data['mean'] = data[['x-axis', 'y-axis', 'z-axis']].mean(numeric_only=True, axis=1)
-    print(data)
+    # print(data.head(29000))
     # total_activities(data)
-    # activity_data_per_user(data)
-    users = [1, 2, 33, 29]
-    activity = 'Downstairs'
-    # compare_user_activitys(data , users[0])
-    activity_difference_between_users(data, users, activity)
+    activity_data_per_user(data)
+    users = [1, 2, 33, 29, 36]
+    activity = 'Walking'
+    activity_length(data)
+    # compare_user_activitys(data , users[1])
+    # activity_difference_between_users(data, users, activity)
+    # show_activity(data,activity,users[2], start = 0, samples=None)
+    # plot_activity(data,activity,users[2])
+    # activity_wise_dist(feature_df, 'x_maxmin_diff')
+    # activity_wise_dist(feature_df, 'y_maxmin_diff')
+    # activity_wise_dist(feature_df, 'z_maxmin_diff')
+    # plt.show()
+    # data.plot(subplots=True, loc='upper right')
+
+
 
     # data = normalize_data(data)
     # # data = tilt_angle(data)

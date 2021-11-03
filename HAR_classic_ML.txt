@@ -1,4 +1,4 @@
-
+For window of 10 seconds and 116 features:
 +---------------------------------+----------+--------+
 |             ML model            | Accuracy | Error  |
 +---------------------------------+----------+--------+
@@ -8,4 +8,147 @@
 |     Decision tree classifier    |  78.33%  | 21.67% |
 |     Random Forest classifier    |  85.51%  | 14.49% |
 | Gradient Boosted Decision Trees |  82.04%  | 17.96% |
++---------------------------------+----------+--------+
+For Window of 2.5 seconds and 114 features:
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  80.91%  | 19.09% |
+|           Linear SVC            |  80.56%  | 19.44% |
+|        rbf SVM classifier       |  80.4%   | 19.6%  |
+|     Decision tree classifier    |  73.48%  | 26.52% |
+|     Random Forest classifier    |  80.62%  | 19.38% |
+| Gradient Boosted Decision Trees |  80.46%  | 19.54% |
++---------------------------------+----------+--------+
+For Window of 2.5 seconds and 14 features:
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  70.87%  | 29.13% |
+|           Linear SVC            |  69.2%   | 30.8%  |
+|        rbf SVM classifier       |  74.14%  | 25.86% |
+|     Decision tree classifier    |  73.51%  | 26.49% |
+|     Random Forest classifier    |  73.75%  | 26.25% |
+| Gradient Boosted Decision Trees |  74.08%  | 25.92% |
++---------------------------------+----------+--------+
+For window of 10 seconds and 116 features:
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  85.28%  | 14.72% |
+|           Linear SVC            |  85.36%  | 14.64% |
+|        rbf SVM classifier       |  80.15%  | 19.85% |
+|     Decision tree classifier    |  77.53%  | 22.47% |
+|     Random Forest classifier    |  85.63%  | 14.37% |
+| Gradient Boosted Decision Trees |  84.66%  | 15.34% |
++---------------------------------+----------+--------+
+For window of 3.2 seconds and 116 features:
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  82.52%  | 17.48% |
+|           Linear SVC            |  81.89%  | 18.11% |
+|        rbf SVM classifier       |  81.71%  | 18.29% |
+|     Decision tree classifier    |  79.03%  | 20.97% |
+|     Random Forest classifier    |  80.98%  | 19.02% |
+| Gradient Boosted Decision Trees |  82.13%  | 17.87% |
++---------------------------------+----------+--------+
+For window of 10 seconds and 116 features. Normalized and filtered (fs_share=0.45, nr_medfil=5):
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  78.73%  | 21.27% |
+|           Linear SVC            |  79.0%   | 21.0%  |
+|        rbf SVM classifier       |  71.71%  | 28.29% |
+|     Decision tree classifier    |  73.33%  | 26.67% |
+|     Random Forest classifier    |  77.15%  | 22.85% |
+| Gradient Boosted Decision Trees |  75.45%  | 24.55% |
++---------------------------------+----------+--------+
+For window of 10 seconds and 122 feature ( low hand high energy with)
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  85.9%   | 14.1%  |
+|           Linear SVC            |  86.09%  | 13.91% |
+|        rbf SVM classifier       |  80.27%  | 19.73% |
+|     Decision tree classifier    |  76.34%  | 23.66% |
+|     Random Forest classifier    |  85.7%   | 14.3%  |
+| Gradient Boosted Decision Trees |  84.66%  | 15.34% |
++---------------------------------+----------+--------+
+For window of 3 seconds and 122 feature ( low hand high energy with)
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  81.65%  | 18.35% |
+|           Linear SVC            |  81.44%  | 18.56% |
+|        rbf SVM classifier       |  81.29%  | 18.71% |
+|     Decision tree classifier    |  74.62%  | 25.38% |
+|     Random Forest classifier    |  81.23%  | 18.77% |
+| Gradient Boosted Decision Trees |  81.89%  | 18.11% |
++---------------------------------+----------+--------+
+For window of 5.5 seconds and 122 feature ( low hand high energy with)
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  85.0%   | 15.0%  |
+|           Linear SVC            |  85.04%  | 14.96% |
+|        rbf SVM classifier       |  82.48%  | 17.52% |
+|     Decision tree classifier    |  77.69%  | 22.31% |
+|     Random Forest classifier    |  83.83%  | 16.17% |
+| Gradient Boosted Decision Trees |  83.49%  | 16.51% |
++---------------------------------+----------+--------+
+For window of 5.5 seconds and 125 feature ( low hand high energy with)
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  85.31%  | 14.69% |
+|           Linear SVC            |  84.98%  | 15.02% |
+|        rbf SVM classifier       |  82.45%  | 17.55% |
+|     Decision tree classifier    |  77.64%  | 22.36% |
+|     Random Forest classifier    |  84.62%  | 15.38% |
+| Gradient Boosted Decision Trees |  83.58%  | 16.42% |
++---------------------------------+----------+--------+
+
+For window of 5.5 seconds removing most of fft features
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  82.24%  | 17.76% |
+|           Linear SVC            |  81.92%  | 18.08% |
+|        rbf SVM classifier       |  80.14%  | 19.86% |
+|     Decision tree classifier    |  74.3%   | 25.7%  |
+|     Random Forest classifier    |  83.0%   | 17.0%  |
+| Gradient Boosted Decision Trees |  83.51%  | 16.49% |
++---------------------------------+----------+--------+
+same but added kurtoses, skewness and peak count
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  85.51%  | 14.49% |
+|           Linear SVC            |  84.76%  | 15.24% |
+|        rbf SVM classifier       |  81.46%  | 18.54% |
+|     Decision tree classifier    |  77.71%  | 22.29% |
+|     Random Forest classifier    |  85.78%  | 14.22% |
+| Gradient Boosted Decision Trees |  84.23%  | 15.77% |
++---------------------------------+----------+--------+
+
+Added entropy and correlation
++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  84.98%  | 15.02% |
+|           Linear SVC            |  84.26%  | 15.74% |
+|        rbf SVM classifier       |  80.61%  | 19.39% |
+|     Decision tree classifier    |  77.9%   | 22.1%  |
+|     Random Forest classifier    |  85.44%  | 14.56% |
+| Gradient Boosted Decision Trees |  84.68%  | 15.32% |
 +---------------------------------+----------+--------++---------------------------------+----------+--------+
+|             ML model            | Accuracy | Error  |
++---------------------------------+----------+--------+
+|       Logistic Regression       |  84.87%  | 15.13% |
+|           Linear SVC            |  84.26%  | 15.74% |
+|        rbf SVM classifier       |  80.61%  | 19.39% |
+|     Decision tree classifier    |  77.88%  | 22.12% |
+|     Random Forest classifier    |  85.57%  | 14.43% |
+| Gradient Boosted Decision Trees |  84.85%  | 15.15% |
++---------------------------------+----------+--------++

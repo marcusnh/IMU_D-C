@@ -126,6 +126,7 @@ def DNN_model(N_NODES, N_LAYERS, COSTUME, N_CLASSES):
         model.add(Dense(N_CLASSES, activation='softmax'))
 
     return model
+
 def CNN_model(N_NODES, N_CLASSES, TIME_PERIODS, N_FEATURES):
     model = Sequential()
     model.add(Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=(TIME_PERIODS,N_FEATURES)))
@@ -138,32 +139,33 @@ def CNN_model(N_NODES, N_CLASSES, TIME_PERIODS, N_FEATURES):
     return model
 
 def LSTM_model(N_NODES, N_CLASSES, TIME_PERIODS, N_FEATURES):
-    #RNN
-    # Bias regularizer value - we will use elasticnet
-    reg = L1L2(0.01, 0.01)
     model = Sequential()
-    model.add(Dense(N_NODES*2, activation='relu'))
-    model.add(Dense(N_NODES, activation='relu'))
-    model.add(LSTM(64, activation='relu',input_shape=(TIME_PERIODS,N_FEATURES), 
-                    return_sequences=True,bias_regularizer=reg))
-    model.add(BatchNormalization())
+    # RNN layer
+    # Bias regularizer value - we will use elasticnet
+    model.add(LSTM(units = 128, input_shape =(TIME_PERIODS,N_FEATURES)))
+    # Dropout layer
+    model.add(Dropout(0.5)) 
+    # Dense layer with ReLu
+    model.add(Dense(units = 64, activation='relu'))
     model.add(Flatten())
-    model.add(Dense(N_CLASSES, activation='sigmoid'))
+    model.add(Dense(N_CLASSES, activation='softmax'))
+
     return model
 
 def bidir_LSTM_model(N_NODES, N_CLASSES,TIME_PERIODS, N_FEATURES):
     #BRNN
     model = Sequential()
     model.add(Dense(N_NODES, activation='relu'))
-    model.add(Dense(N_NODES, activation='relu'))
     model.add(Dropout(0.2,))
-    model.add(Bidirectional(LSTM(round(64), #activation='relu',
+    model.add(Bidirectional(LSTM(units=128, #activation='relu',
                                 return_sequences=True),
                                 input_shape=(TIME_PERIODS,N_FEATURES)))
     model.add(Bidirectional(LSTM(round(30), activation='relu',
                                 return_sequences=True),
                                 input_shape=(TIME_PERIODS,N_FEATURES)))
-    model.add(Dropout(0.2,))
+    model.add(Dropout(0.5,))
+    model.add(Dense(N_NODES, activation='relu'))
+
     model.add(Flatten())
     model.add(Dense(N_CLASSES, activation='softmax'))
 
@@ -177,7 +179,7 @@ def train_model(BATCH_SIZE, EPOCHS, file_name, file_type, model, x_train, y_trai
         # keras.callbacks.ModelCheckpoint(filepath='best_'+file_name+'.{epoch:02d}-{val_accuracy:.2f}.h5',
         #                                 monitor='accuracy', save_best_only=True), 
         keras.callbacks.TensorBoard(log_dir='./logs'),
-        keras.callbacks.EarlyStopping(monitor='val_accuracy',mode='max',verbose=1, patience=12, 
+        keras.callbacks.EarlyStopping(monitor='val_accuracy',mode='max',verbose=1, patience=5, 
                                       min_delta=0.001),]
 
      # config the model  
@@ -199,17 +201,18 @@ if __name__ == '__main__':
     ########################################################################
     #                  1) Pre-processing the data
     ########################################################################
-    file_path = 'Data/test/WISDM_feature.csv'
-    feature_df = pd.read_csv(file_path)
-    print(feature_df)
+    # file_path = 'Data/test/WISDM_feature.csv'
+    # feature_df = pd.read_csv(file_path)
+    # print(feature_df)
     # data = tilt_angle(data)
     # data['SVM'] = np.sqrt(data['x-axis']**2+data['y-axis']**2+data['z-axis']**2)
+    # data = data[['user_id' , 'activity','timestamp','SVM']].copy()
+    print(data)
     # Normalize data [-1,1]: across subjects or
     # data = normalize_data(data)
-    # print(data)
     
     # #FILTERING:
-    # data = filter_data(data)
+    data = filter_data(data,fs_share=0.45, nr_medfil=3)
 
     
     #################################################################
@@ -222,22 +225,35 @@ if __name__ == '__main__':
     # to be negligible. This has t o be considered becuase it will effect
     # the performance of the DNN
     ##################################################################
-    data_train, data_test = split_data(data, ratio=0.9)
+    segment_array, segment_labels,LABELS = extract_windows(data, sec=2.5, overlap_prosent=50)
+    print(segment_array.shape)
+    # data_train, data_test = split_data(data, ratio=0.8)
     # #  ID 1-28 for training and 28>for testing
     # data_test = data[data['user_id'] > 28].copy()
     # data_train = data[data['user_id'] <= 28].copy()
-    X_test, y_test, LABELS = extract_windows(data_test, sec=6.4, overlap_prosent=50)
-    X_train, y_train, LABELS = extract_windows(data_train, sec=6.4, overlap_prosent=50)
-     #  conduct one-hot-encoding of our labels:
-    y_test_hot, y_train_hot = pd.get_dummies(y_test).to_numpy(), pd.get_dummies(y_train).to_numpy()
-
+    # X_test, y_test, LABELS = extract_windows(data_test, sec=2.5, overlap_prosent=20)
+    # X_train, y_train, LABELS = extract_windows(data_train, sec=2.5, overlap_prosent=20)
+    random_seed=42
+    X_train, X_test, y_train, y_test = train_test_split(segment_array, 
+        segment_labels, test_size = 0.2, random_state = random_seed)
+        
+    X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, 
+                                    test_size=0.5, random_state=1) 
+    # Conduct one-hot-encoding of labels:
+    y_train_hot = pd.get_dummies(y_train).to_numpy()
+    y_test_hot = pd.get_dummies(y_test).to_numpy()
+    y_val_hot = pd.get_dummies(y_val).to_numpy()
+        
     timesteps = len(X_train[0])
     input_dim = len(X_train[0][0])
     n_classes = _count_classes(y_train_hot)
 
-    print(timesteps)
-    print(input_dim)
-    print(len(X_train))
+    print(len(X_train), timesteps, input_dim)
+
+    print('X_train and y_train : ({},{})'.format(X_train.shape, y_train.shape))
+    print('X_test  and y_test  : ({},{})'.format(X_test.shape, y_test.shape))
+    print('X_val  and y_val  : ({},{})'.format(X_val.shape, y_val.shape))
+
 
     #############################################################################
     #              3/4) Create and train model / Load exsisting model
@@ -246,15 +262,17 @@ if __name__ == '__main__':
     # split we can also create a CNN or other complex NN if we want
     #############################################################################
     # Initializing parameters
-    epochs = 30
-    batch_size = 16
+    epochs = 50
+    batch_size = 1024
     n_hidden = 32
     N_LAYERS = 3
+    learning_rate = 0.0025
+    l2_loss = 0.0015
     COSTUME = True
-    file_name ="model_feature2_yz_LTSM"
+    file_name ="model_feature3_bidir_LTSM"
     file_type ='Keras' # 'YAML' 'JSON
-    # model = DNN_model(epochs, N_LAYERS, COSTUME, n_classes)
-    model= LSTM_model(epochs, n_classes, timesteps, N_FEATURES=input_dim)
+    model = DNN_model(epochs, N_LAYERS, COSTUME, n_classes)
+    # model= LSTM_model(epochs, n_classes, timesteps, N_FEATURES=input_dim)
     # model = bidir_LSTM_model(epochs, n_classes, timesteps, N_FEATURES=input_dim)
     # train model:
     model = train_model(batch_size, epochs, file_name, file_type, model, X_train, y_train_hot)
@@ -262,30 +280,27 @@ if __name__ == '__main__':
     #load model:
     # model = load_model(file_name, file_type)
    
-
-    # Print confusion matrix:
-    y_pred_train = model.predict(X_train)
-    best_class_train = np.argmax(y_pred_train, axis=1)
+    # validation data performance
+    y_pred_val = model.predict(X_val)
+    
+    best_class_val = np.argmax(y_pred_val, axis=1)
+    
     print('Classification report for training data:')
-    print(classification_report(y_train, best_class_train))
-   
-
+    print(classification_report(y_val, best_class_val))
+    
+    # Training data performance
     y_pred_test = model.predict(X_test)
     best_class_pred_test = np.argmax(y_pred_test, axis=1)
     best_class_test = np.argmax(y_test_hot, axis=1)
-    confusion_matrix(best_class_test, best_class_pred_test, LABELS, normalize=True)
+    
     print('Classification report for test data')
     print(classification_report(best_class_test, best_class_pred_test))
-    print(LABELS)
-
+    confusion_matrix(best_class_test, best_class_pred_test, LABELS, normalize=True)
+    
+    #Evaluation score: categorical cross-entropy and accuracy
     score = model.evaluate(X_test, y_test_hot)
-    # # repeat experiment
-    # scores = list()
-    # for r in range(repeats):
-    #     score = evaluate_model(X_train, y_train, X_test, testy)
-    #     score = score * 100.0
-    #     print('>#%d: %.3f' % (r+1, score))
-    #     scores.append(score)
+
+   
 
     print("\n   cat_crossentropy  ||   accuracy ")
     print("____________________________________")
