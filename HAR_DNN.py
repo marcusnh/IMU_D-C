@@ -18,7 +18,10 @@ import seaborn as sns
 import coremltools
 import random
 import pickle
+
 from scipy import stats
+from scipy.stats import reciprocal
+
 from IPython.display import display, HTML
 from prettytable import PrettyTable
 
@@ -26,6 +29,10 @@ from sklearn import metrics
 from sklearn.metrics import classification_report
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import GridSearchCV
+
+from skopt import BayesSearchCV
 
 import keras
 from keras.models import Sequential
@@ -35,6 +42,7 @@ from keras.layers import BatchNormalization
 from keras.layers import Conv2D, MaxPooling2D, Bidirectional
 from keras.regularizers import L1L2
 from keras.utils import np_utils
+from keras_tuner import RandomSearch
 
 import tensorflow as tf
 
@@ -107,23 +115,16 @@ def load_model(file_name, file_type):
 
 # Create models:
 
-def DNN_model(N_NODES, N_LAYERS, COSTUME, N_CLASSES):
+def DNN_model(n_neurons, n_hidden, learning_rate, n_classes=6):
     model = Sequential()
-    if (COSTUME):
-        model.add(Dense(N_NODES*2, activation='relu'))
-        model.add(Dense(N_NODES, activation='relu'))
-        model.add(Dense(N_NODES, activation='relu'))
+    model.add(Dense(n_neurons, activation='relu'))
+    for i in range(n_hidden):
+        model.add(Dense(n_neurons, activation='relu'))
         
-        model.add(Dense(N_NODES, activation='relu'))
-        model.add(Flatten())
-        model.add(Dense(N_CLASSES, activation='softmax'))
-    else:
-        NODES = random.randint(N_NODES/2, N_NODES*2)
-        for i in range(N_LAYERS):
-            model.add(Dense(N_NODES, activation='relu'))
-            
-        model.add(Flatten())
-        model.add(Dense(N_CLASSES, activation='softmax'))
+    model.add(Flatten())
+    model.add(Dense(n_classes, activation='softmax'))
+    
+    model = build_model(model, learning_rate)
 
     return model
 
@@ -160,7 +161,7 @@ def bidir_LSTM_model(N_NODES, N_CLASSES,TIME_PERIODS, N_FEATURES):
     model.add(Bidirectional(LSTM(units=128, #activation='relu',
                                 return_sequences=True),
                                 input_shape=(TIME_PERIODS,N_FEATURES)))
-    model.add(Bidirectional(LSTM(round(30), activation='relu',
+    model.add(Bidirectional(LSTM(round(60), activation='relu',
                                 return_sequences=True),
                                 input_shape=(TIME_PERIODS,N_FEATURES)))
     model.add(Dropout(0.5,))
@@ -195,6 +196,31 @@ def train_model(BATCH_SIZE, EPOCHS, file_name, file_type, model, x_train, y_trai
     save_model(model, file_name, file_type)#
     return model
 
+def build_model(model, learning_rate=3e-3):
+   
+    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+    model.compile(loss='sparse_categorical_crossentropy', optimizer =optimizer, metrics = ['accuracy'])
+    
+    return model
+
+def search_model(hp):
+    model = Sequential()
+    model.add(Flatten())
+    for i in range(hp.Int("num_layers", 2, 20)):
+        model.add(
+            Dense(
+                units=hp.Int("units_" + str(i), min_value=32, max_value=512, step=32),
+                activation="relu",
+            )
+        )
+    model.add(Dense(6, activation="softmax"))
+
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(hp.Choice("learning_rate", [1e-2, 1e-3, 1e-4])),
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"],
+    )
+    return model
 if __name__ == '__main__':
     # Extract data
     data = txt_to_pd_WISDM()
@@ -212,7 +238,7 @@ if __name__ == '__main__':
     # data = normalize_data(data)
     
     # #FILTERING:
-    data = filter_data(data,fs_share=0.45, nr_medfil=3)
+    # data = filter_data(data,fs_share=0.45, nr_medfil=3)
 
     
     #################################################################
@@ -262,20 +288,50 @@ if __name__ == '__main__':
     # split we can also create a CNN or other complex NN if we want
     #############################################################################
     # Initializing parameters
-    epochs = 50
+    n_neurons = 50
     batch_size = 1024
-    n_hidden = 32
-    N_LAYERS = 3
+    n_hidden = 3
     learning_rate = 0.0025
     l2_loss = 0.0015
     COSTUME = True
     file_name ="model_feature3_bidir_LTSM"
     file_type ='Keras' # 'YAML' 'JSON
-    model = DNN_model(epochs, N_LAYERS, COSTUME, n_classes)
-    # model= LSTM_model(epochs, n_classes, timesteps, N_FEATURES=input_dim)
-    # model = bidir_LSTM_model(epochs, n_classes, timesteps, N_FEATURES=input_dim)
-    # train model:
-    model = train_model(batch_size, epochs, file_name, file_type, model, X_train, y_train_hot)
+
+    keras_param_space = {"n_hidden": [1, 2, 3, 4],
+                      "n_neurons": [50], #np.arange(30, 300),
+                      "learning_rate":[3e-4, 3e-2],
+                      }
+
+    model = DNN_model(n_neurons, n_hidden, n_classes)
+    # model= LSTM_model(n_neurons, n_classes, timesteps, N_FEATURES=input_dim)
+    # model = bidir_LSTM_model(n_neurons, n_classes, timesteps, N_FEATURES=input_dim)
+    # keras_clf = tf.keras.wrappers.scikit_learn.KerasClassifier(DNN_model)
+    # model = GridSearchCV(keras_clf, keras_param_space, #n_iter=20, 
+    #                                cv=5, scoring="accuracy", n_jobs=6, verbose=True)
+    # tuner = RandomSearch(search_model, 
+    #                         objective='val_accuracy', 
+    #                         max_trials=3,
+    #                         executions_per_trial=2,
+    #                         overwrite=True)
+
+    # tuner.search(X_train, y_train, epochs=10, validation_data=(X_val, y_val))
+    # model = tuner.get_best_models(num_models=2)
+    # print(tuner.results_summary())
+    # history = model.fit(X_train, y_train, epochs=1,
+    #                    validation_data=(X_val, y_val),
+    #                    callbacks=[keras.callbacks.EarlyStopping(patience=10)])
+    # # train model:
+    model = train_model(batch_size, n_neurons, file_name, file_type, model, X_train, y_train_hot)
+    performance = {}
+    performance['model'] = model
+    performance['best_params_'] = model.best_params_
+    # print(model.summary())
+    print('\n\n==> Best Estimator:')
+    print('\t{}\n'.format(model.best_estimator_))
+    # parameters that gave best results while performing grid search
+    print('\n==> Best parameters:')
+    print('\tParameters of best estimator : {}'.format(model.best_params_))
+
 
     #load model:
     # model = load_model(file_name, file_type)
@@ -287,8 +343,10 @@ if __name__ == '__main__':
     
     print('Classification report for training data:')
     print(classification_report(y_val, best_class_val))
-    
-    # Training data performance
+    # Evaluation score: categorical cross-entropy and accuracy
+    score = model.evaluate(X_val, y_val_hot)
+    performance['validation score'] = score
+    # Test data performance
     y_pred_test = model.predict(X_test)
     best_class_pred_test = np.argmax(y_pred_test, axis=1)
     best_class_test = np.argmax(y_test_hot, axis=1)
@@ -297,15 +355,15 @@ if __name__ == '__main__':
     print(classification_report(best_class_test, best_class_pred_test))
     confusion_matrix(best_class_test, best_class_pred_test, LABELS, normalize=True)
     
-    #Evaluation score: categorical cross-entropy and accuracy
+    # Evaluation score: categorical cross-entropy and accuracy
     score = model.evaluate(X_test, y_test_hot)
-
+    performance['Test score'] = score
    
 
     print("\n   cat_crossentropy  ||   accuracy ")
     print("____________________________________")
     print(score)
-    t = PrettyTable(['NN model', 'cat_crossentropy', 'Accuracy',])
-    t.add_row([file_name,score[0],score[1]])
+    t = PrettyTable(['NN model', 'cat_crossentropy', 'Accuracy','model_param'])
+    t.add_row([file_name,score[0],score[1], model.best_params_])
     with open('HAR_DNN.txt', 'a+') as f:
         f.write(str(t))

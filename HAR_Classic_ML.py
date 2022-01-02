@@ -156,58 +156,56 @@ if __name__ == '__main__':
     ## Logistic regression:
     # define evaluation
     log_reg = linear_model.LogisticRegression(solver='liblinear')
-    params = {'C':[0.01, 0.1, 1, 10, 20, 30], 
-                    'penalty':['l2','l1']}
 
     cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=2, random_state=1)
     print ('cv: ', cv)
     n_jobs = -1 # automatically use all of the cores in your system
     
     # perform the search
-    parameters = {'C':[0.01, 0.1, 1, 10, 20, 30], 
+    parameters = {'C':[ 20, 30], 
                     'penalty':['l2','l1']}
 
     log_reg_res = model_tuning(log_reg,class_labels, X_train, y_train, X_val, 
                  y_val, parameters, n_jobs=n_jobs, cv=cv, verbose=1)
     
     # ## Linear support vector classification
-    parameters = {'C':[0.125, 0.5, 1, 2, 8, 16, 30]}
+    parameters = {'C':[ 8, 16, 30]}
     lr_svc = LinearSVC(tol=0.00005, dual=False)
-    lr_svc_res = model_tuning(lr_svc,class_labels, X_train, y_train, X_test, 
-                 y_test, parameters, n_jobs=-1, verbose=1)
-    ## kernel SVM:
-    kernel_scv = SVC(kernel='rbf', gamma ='scale')
-    parameters = {'C':[2,8,16,32,100,500,1000],\
-                 'gamma': [ 0.0078125, 0.125, 2]}
-    kernel_scv_res = model_tuning(kernel_scv,class_labels, X_train, y_train, X_test, 
-                 y_test, parameters, n_jobs=-1,)
+    lr_svc_res = model_tuning(lr_svc,class_labels, X_train, y_train, X_val, 
+                 y_val, parameters, n_jobs=-1, verbose=1)
+    # ## kernel SVM:
+    # kernel_scv = SVC(kernel='rbf', gamma ='scale')
+    # parameters = {'C':[0.01,1, 2,8,16,32,100,500,1000],\
+    #              'gamma': [ 0.0078125, 0.125, 2]}
+    # kernel_scv_res = model_tuning(kernel_scv,class_labels, X_train, y_train, X_val, 
+    #              y_val, parameters, n_jobs=-1,)
     
     ## decision tree classifier:
     parameters = {'max_depth': np.arange(1,10,1)}
     dtc = DecisionTreeClassifier()
-    dtc_res = model_tuning(dtc,class_labels, X_train, y_train, X_test, 
-                 y_test, parameters, n_jobs=-1,)
+    dtc_res = model_tuning(dtc,class_labels, X_train, y_train, X_val, 
+                 y_val, parameters, n_jobs=-1,)
     # # Random Forest Classifier
     params = {'n_estimators': np.arange(1,181,25), 
                 'max_depth': np.arange(1,25,2)}
     rfc = RandomForestClassifier()
-    rfc_res = model_tuning(rfc,class_labels, X_train, y_train, X_test, 
-                 y_test, params, n_jobs=-1,)
+    rfc_res = model_tuning(rfc,class_labels, X_train, y_train, X_val, 
+                 y_val, params, n_jobs=-1,)
 
     # Gradient Boosted Decision Trees:
-    params = {'max_depth': [1,4,6,26],
-              'n_estimators': np.arange(1,20)}
-    gbdt = GradientBoostingClassifier()
-    gbdt_res = model_tuning(gbdt,class_labels, X_train, y_train, X_test, 
-                 y_test, params, n_jobs=-1,)
+    # params = {'max_depth': [1,4,6,26],
+    #           'n_estimators': np.arange(1,20)}
+    # gbdt = GradientBoostingClassifier()
+    # gbdt_res = model_tuning(gbdt,class_labels, X_train, y_train, X_val, 
+    #              y_val, params, n_jobs=-1,)
 
     # save models:             
     model_res ={'Logistic Regression':log_reg_res, 
                 'Linear SVC ': lr_svc_res,
-               'rbf SVM classifier': kernel_scv_res,
+            #    'rbf SVM classifier': kernel_scv_res,
                 ' Decision tree classifier' :dtc_res, 
-                'Random Forest classifier':rfc_res, 
-                'Gradient Boosted Decision Trees': gbdt_res}
+                'Random Forest classifier':rfc_res} 
+                # 'Gradient Boosted Decision Trees': gbdt_res}
     
     print('\n      ML model      Accuracy     Error')
     print('   ---------------------------------------')

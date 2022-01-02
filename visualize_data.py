@@ -241,14 +241,14 @@ if __name__ == '__main__':
     # data['mean'] = data[['x-axis', 'y-axis', 'z-axis']].mean(numeric_only=True, axis=1)
     # print(data.head(29000))
     # total_activities(data)
-    activity_data_per_user(data)
-    users = [1, 2, 33, 29, 36]
+    # activity_data_per_user(data)
+    users = [1, 3, 33, 29, 36]
     activity = 'Walking'
-    activity_length(data)
+    # activity_length(data)
     # compare_user_activitys(data , users[1])
-    # activity_difference_between_users(data, users, activity)
-    # show_activity(data,activity,users[2], start = 0, samples=None)
-    # plot_activity(data,activity,users[2])
+    show_activity(data,activity,users[2], start = 0, samples=6*20)
+    
+    plt.show()
     # activity_wise_dist(feature_df, 'x_maxmin_diff')
     # activity_wise_dist(feature_df, 'y_maxmin_diff')
     # activity_wise_dist(feature_df, 'z_maxmin_diff')
@@ -266,7 +266,6 @@ if __name__ == '__main__':
     # # print(data[['activity','SVM']])
     # activity_data_per_user(data)
     # column = 'z-axis'
-    # activity_wise_dist(data, column)
     # activity_boxplot_dist(data, column)
     # execute_TSNE(data[0:10000],)
 

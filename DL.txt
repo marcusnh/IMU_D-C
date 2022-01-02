@@ -1,0 +1,14 @@
+BLSTM: 
+Classification report for test data:
+              precision    recall  f1-score   support
+
+           0       0.84      0.90      0.87       387
+           1       0.99      0.99      0.99      1307
+           2       0.98      0.99      0.99       233
+           3       0.98      0.99      0.99       190
+           4       0.93      0.83      0.88       490
+           5       0.98      0.99      0.98      1735
+
+    accuracy                           0.96      4342
+   macro avg       0.95      0.95      0.95      4342
+weighted avg       0.96      0.96      0.96      4342
