@@ -5,11 +5,10 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem=12000
-#SBATCH --job-name="hello_test"
+#SBATCH --job-name="DL.py Run"
 #SBATCH --output=test-srun.out
 #SBATCH --mail-user=marcusnh@stud.ntnu.no
 #SBATCH --mail-type=ALL
-#SBATCH --gres=gpu:2
 
 WORKDIR=${SLURM_SUBMIT_DIR}
 cd ${WORKDIR}
@@ -24,6 +23,6 @@ echo "Total of $SLURM_NTASKS cores"
 
 module purge
 module load Anaconda/2020.07
-python HAR_ML.py
+python DL.py
 
 uname -a

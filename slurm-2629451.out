@@ -1,0 +1,29 @@
+Lmod has detected the following error: The following module(s) are unknown:
+"fosscuda/2019a"
+
+Please check the spelling or version number. Also try "module spider ..."
+It is also possible your cache file is out-of-date; it may help to try:
+  $ module --ignore-cache load "fosscuda/2019a"
+
+Also make sure that all modulefiles written in TCL start with the string
+#%Module
+
+
+
+Lmod has detected the following error: The following module(s) are unknown:
+"TensorFlow/1.13.1-Python-3.7.2"
+
+Please check the spelling or version number. Also try "module spider ..."
+It is also possible your cache file is out-of-date; it may help to try:
+  $ module --ignore-cache load "TensorFlow/1.13.1-Python-3.7.2"
+
+Also make sure that all modulefiles written in TCL start with the string
+#%Module
+
+
+
+/var/slurm_spool/job2629451/slurm_script: line 11: mpirun: command not found
+
+real	0m0.001s
+user	0m0.000s
+sys	0m0.000s
